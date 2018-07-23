@@ -43,12 +43,13 @@ class Line(object):
                 raise e
                 
     def __eq__(self, line):
-        if(self.is_parallel(line)):
+        if(not self.is_parallel(line)):
             return False
         
-        nv1 = self.normal_vector
-        nv2 = line.normal_vector      
-        return nv1.minus(nv2).is_orthogonal(nv1)
+        bp1 = self.basepoint
+        bp2 = line.basepoint        
+        bpDelta = bp1.minus(bp2)        
+        return bpDelta.is_orthogonal(self.normal_vector)        
 
 
     def __str__(self):
@@ -103,24 +104,27 @@ class Line(object):
     
     def intersection(self, line):
         
-        try:
-            A, B = self.normal_vector.coordinates
-            C, D = line.normal_vector.coordinates
-            
-            k1 = self.constant_term
-            k2 = line.constant_term
-            
-            x_num = D * k1 - B * k2
-            y_denom = -C * k1 + A * k2
-            one_over_denom = Decimal('1.0') / (A * D - B * C)
-            
-            return Vector([x_num, y_denom]).multiply(one_over_denom)
-            
-        except ZeroDivisionError:           
-            if(self == line):
+        A, B = self.normal_vector.coordinates
+        C, D = line.normal_vector.coordinates
+        
+        k1 = self.constant_term
+        k2 = line.constant_term
+        
+        x_num = D * k1 - B * k2
+        y_denom = -C * k1 + A * k2
+        denom =  (A * D - B * C)
+        
+        # doesn't throw 0 div exception so check here instead
+        if (MyDecimal(denom).is_near_zero()):
+            if(self == line):                
                 return self
             else:
                 return None
+        
+        one_over_denom = Decimal('1.0') / denom
+            
+        return Vector([x_num, y_denom]).multiply(one_over_denom)
+    
     
     @staticmethod
     def first_nonzero_index(iterable):

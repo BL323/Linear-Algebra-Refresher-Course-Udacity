@@ -23,9 +23,12 @@ class Vector(object):
     def __eq__(self, vec):
         return self.coordinates == vec.coordinates
     
-    def iter(self): 
-        return self.coordinates.iter()
-   
+    def __iter__(self):
+            return iter(self.coordinates)
+
+    def __getitem__(self,index):
+            return self.coordinates[index]
+        
     def plus(self, vec):
         new_coordinates = [x + y for x,y in zip(self.coordinates, vec.coordinates)]
         return Vector(new_coordinates)
@@ -43,7 +46,7 @@ class Vector(object):
  
     def normalisation(self):
         try:
-            normalisationFactor = Decimal("1.0") / self.Magnitude()
+            normalisationFactor = Decimal("1.0") / self.magnitude()
             return Vector([x * normalisationFactor for x in self.coordinates])
        
         except ZeroDivisionError:
@@ -54,24 +57,24 @@ class Vector(object):
         
     def angle(self, vec, asDegrees = False):
         # handling 0 vector is still required
-        cosTheta = self.DotProduct(vec) / (self.Magnitude() * vec.Magnitude())
+        cosTheta = self.dotProduct(vec) / (self.magnitude() * vec.magnitude())
         radians = acos(round(cosTheta, 4))       
         return radians if not asDegrees else degrees(radians)
        
     def is_parallel(self, vec):
         # if vec is 0 then is parallel
-        if self.IsZero() or vec.IsZero():
+        if self.is_zero() or vec.is_zero():
             return True      
-        return Decimal(self.Angle(vec)) in [0, pi]
+        return Decimal(self.angle(vec)) in [0, pi]
  
     def is_orthogonal(self, vec):
         # if vec is 0 then is parallel
-        if self.IsZero() or vec.IsZero():
+        if self.is_zero() or vec.is_zero():
             return True     
-        return round(self.DotProduct(vec),3) == 0
+        return round(self.dotProduct(vec),3) == 0
    
     def is_zero(self):
-        return self.Magnitude() == 0
+        return self.magnitude() == 0
    
     
     def project_onto(self, basisVector):
@@ -86,8 +89,8 @@ class Vector(object):
        """
        This is the perpendicular element of projected vector onto basis vector
        """
-       projectedVector = self.ProjectOnto(basisVector)
-       return self.Minus(projectedVector)
+       projectedVector = self.project_onto(basisVector)
+       return self.minus(projectedVector)
    
     def crossProduct(self, vec):
         x1 = self.coordinates[0]
@@ -102,9 +105,9 @@ class Vector(object):
         """
         Area of parallelogram from the computed cross product of two vectors
         """
-        crossProd = self.CrossProduct(vec)
-        return crossProd.Magnitude()
+        crossProd = self.crossProduct(vec)
+        return crossProd.magnitude()
    
     def area_of_triangle(self, vec):
-        crossProd = self.CrossProduct(vec)
-        return crossProd.Magnitude() / Decimal("2.0")
+        crossProd = self.crossProduct(vec)
+        return crossProd.magnitude() / Decimal("2.0")
