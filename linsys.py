@@ -1,6 +1,5 @@
 from decimal import Decimal, getcontext
 from copy import deepcopy
-
 from vector import Vector
 from plane import Plane
 
@@ -27,11 +26,17 @@ class LinearSystem(object):
 
 
     def swap_rows(self, row1, row2):
-        pass # add your code here
+        # should add check here to ensure row 1 & 2 are not out of range
+        tmp = self[row1]
+        self[row1] = self[row2]
+        self[row2] = tmp
 
 
     def multiply_coefficient_and_row(self, coefficient, row):
-        pass # add your code here
+        plane = self[row] 
+        scaledConstTerm = plane.constant_term * coefficient
+        scaledNormalVec = plane.normal_vector.multiply(coefficient)
+        self[row] = Plane(scaledNormalVec, scaledCoeff)
 
 
     def add_multiple_times_row_to_row(self, coefficient, row_to_add, row_to_be_added_to):
@@ -85,20 +90,3 @@ class MyDecimal(Decimal):
         return abs(self) < eps
 
 
-p0 = Plane(normal_vector=Vector(['1','1','1']), constant_term='1')
-p1 = Plane(normal_vector=Vector(['0','1','0']), constant_term='2')
-p2 = Plane(normal_vector=Vector(['1','1','-1']), constant_term='3')
-p3 = Plane(normal_vector=Vector(['1','0','-2']), constant_term='2')
-
-s = LinearSystem([p0,p1,p2,p3])
-
-print s.indices_of_first_nonzero_terms_in_each_row()
-print '{},{},{},{}'.format(s[0],s[1],s[2],s[3])
-print len(s)
-print s
-
-s[0] = p1
-print s
-
-print MyDecimal('1e-9').is_near_zero()
-print MyDecimal('1e-11').is_near_zero()
