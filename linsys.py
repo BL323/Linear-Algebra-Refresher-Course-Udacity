@@ -45,11 +45,27 @@ class LinearSystem(object):
         normalVec = planeToMutate.normal_vector.multiply(coefficient).plus(targetPlane.normal_vector)
         self[row_to_be_added_to] = Plane(normalVec, constTerm)
         
-    def swap_with_row_below_for_nonZero_coeff_if_able(self, i, j):
-        pass
+    def swap_with_row_below_for_nonZero_coeff_if_able(self, row, col):
+        num_equations = len(self)
 
-    def clear_coefficients_below(self, i , j):
-        pass
+        for k in range(row+1, num_equations):
+            coeff = MyDecimal(self[k].normal_vector[col])
+            if(not coeff.is_near_zero()):
+                self.swap_rows(row, k)
+                return True
+        
+        return False
+        
+
+    def clear_coefficients_below(self, row , col):
+        num_equations = len(self)
+        beta = MyDecimal(self[row].normal_vector[col])    
+
+        for k in range(row+1, num_equations):
+            n = self[k].normal_vector
+            gamma = n[col]
+            alpha = -gamma/beta
+            self.add_multiple_times_row_to_row(alpha, row, k)
     
     def compute_triangular_form(self):
         system = deepcopy(self)
@@ -57,8 +73,8 @@ class LinearSystem(object):
         num_equations = len(system)
         num_variables = system.dimension
         j = 0
-        for i in range(m):
-            while(j<n):
+        for i in range(num_equations):
+            while(j < num_variables):
                 # coeff in row i, j-th term
                 c = system[i].normal_vector[j]
                 if(MyDecimal(c).is_near_zero()):

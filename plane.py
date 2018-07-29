@@ -94,13 +94,15 @@ class Plane(object):
         return nv1.is_parallel(nv2)
 
     def __eq__(self, plane):
-        if(not self.is_parallel(plane)):
-            return False
+        if not self.basepoint and not plane.basepoint:
+            return True
         
-        bp1 = self.basepoint
-        bp2 = plane.basepoint        
-        bpDelta = bp1.minus(bp2)        
-        return bpDelta.is_orthogonal(self.normal_vector)      
+        if(self.is_parallel(plane)):
+            bp1 = self.basepoint
+            bp2 = plane.basepoint        
+            bpDelta = bp1.minus(bp2)        
+            return bpDelta.is_orthogonal(self.normal_vector)      
+        return False
     
  
 
