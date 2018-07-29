@@ -40,14 +40,38 @@ class LinearSystem(object):
 
     def add_multiple_times_row_to_row(self, coefficient, row_to_add, row_to_be_added_to):
         planeToMutate = self[row_to_add]
-        targetPlane = self[row_to_be_added_to]
-        
+        targetPlane = self[row_to_be_added_to]       
         constTerm = (planeToMutate.constant_term * coefficient) + targetPlane.constant_term
         normalVec = planeToMutate.normal_vector.multiply(coefficient).plus(targetPlane.normal_vector)
         self[row_to_be_added_to] = Plane(normalVec, constTerm)
+        
+    def swap_with_row_below_for_nonZero_coeff_if_able(self, i, j):
+        pass
+
+    def clear_coefficients_below(self, i , j):
+        pass
+    
+    def compute_triangular_form(self):
+        system = deepcopy(self)
+
+        num_equations = len(system)
+        num_variables = system.dimension
+        j = 0
+        for i in range(m):
+            while(j<n):
+                # coeff in row i, j-th term
+                c = system[i].normal_vector[j]
+                if(MyDecimal(c).is_near_zero()):
+                    swap_succeeded = system.swap_with_row_below_for_nonZero_coeff_if_able(i, j)  
+                    if not swap_succeeded:
+                        j += 1
+                        continue
+
+                system.clear_coefficients_below(i, j)
+                j += 1
+                break        
+        return system
          
-
-
     def indices_of_first_nonzero_terms_in_each_row(self):
         num_equations = len(self)
         num_variables = self.dimension
