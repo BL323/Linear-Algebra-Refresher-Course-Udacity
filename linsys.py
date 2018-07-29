@@ -29,18 +29,23 @@ class LinearSystem(object):
         # should add check here to ensure row 1 & 2 are not out of range
         tmp = self[row1]
         self[row1] = self[row2]
-        self[row2] = tmp
-
+        self[row2] = tmp       
 
     def multiply_coefficient_and_row(self, coefficient, row):
         plane = self[row] 
         scaledConstTerm = plane.constant_term * coefficient
         scaledNormalVec = plane.normal_vector.multiply(coefficient)
-        self[row] = Plane(scaledNormalVec, scaledCoeff)
+        self[row] = Plane(scaledNormalVec, scaledConstTerm)
 
 
     def add_multiple_times_row_to_row(self, coefficient, row_to_add, row_to_be_added_to):
-        pass # add your code here
+        planeToMutate = self[row_to_add]
+        targetPlane = self[row_to_be_added_to]
+        
+        constTerm = (planeToMutate.constant_term * coefficient) + targetPlane.constant_term
+        normalVec = planeToMutate.normal_vector.multiply(coefficient).plus(targetPlane.normal_vector)
+        self[row_to_be_added_to] = Plane(normalVec, constTerm)
+         
 
 
     def indices_of_first_nonzero_terms_in_each_row(self):
