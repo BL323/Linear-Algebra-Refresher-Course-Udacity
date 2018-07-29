@@ -88,6 +88,12 @@ class LinearSystem(object):
                 break        
         return system
          
+    def compute_rref(self):
+        tf = self.compute_triangular_form()
+        num_equations = len(tf)
+
+        return tf
+
     def indices_of_first_nonzero_terms_in_each_row(self):
         num_equations = len(self)
         num_variables = self.dimension
