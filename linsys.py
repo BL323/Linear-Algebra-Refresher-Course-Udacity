@@ -57,7 +57,7 @@ class LinearSystem(object):
         return False
         
 
-    def clear_coefficients_below(self, row , col):
+    def clear_coefficients_below(self, row, col):
         num_equations = len(self)
         beta = MyDecimal(self[row].normal_vector[col])    
 
@@ -66,6 +66,16 @@ class LinearSystem(object):
             gamma = n[col]
             alpha = -gamma/beta
             self.add_multiple_times_row_to_row(alpha, row, k)
+
+    def clear_coefficients_above(self, row, col):
+        num_equations = len(self)
+        beta = MyDecimal(self[row].normal_vector[col])    
+
+        for k in range(num_equations-1, row, -1):
+            n = self[k].normal_vector
+            gamma = n[col]
+            alpha = -gamma/beta
+
     
     def compute_triangular_form(self):
         system = deepcopy(self)
@@ -92,7 +102,23 @@ class LinearSystem(object):
         tf = self.compute_triangular_form()
         num_equations = len(tf)
 
+        indexes = tf.indices_of_first_nonzero_terms_in_each_row()
+
+        for i in range(num_equations-1, -1, -1):
+           j = indexes[i]
+           if j < 0:
+            continue
+            
+            tf.scale_row_to_make_coeff_sinuglar(i, j)
+            tf.clear_coefficients_above(i, j)
+
         return tf
+
+    def scale_row_to_make_coeff_sinuglar(self, row, col):     
+        n = self[row].normal_vector
+        beta = Decimal(1) / n[col]
+        self.multiply_coefficient_and_row(beta, row)
+    
 
     def indices_of_first_nonzero_terms_in_each_row(self):
         num_equations = len(self)
