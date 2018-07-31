@@ -138,4 +138,3 @@ if not (r[0] == Plane(normal_vector=Vector(['1','0','0']), constant_term=Decimal
         r[2] == Plane(normal_vector=Vector(['0','0','1']), constant_term=Decimal('2')/Decimal('9'))):
     print('test case 4 failed')
     
-    
