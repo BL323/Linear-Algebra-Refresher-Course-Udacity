@@ -2,6 +2,7 @@ from decimal import Decimal, getcontext
 from copy import deepcopy
 from vector import Vector
 from plane import Plane
+from parameterisation import Parameterisation
 
 getcontext().prec = 30
 
@@ -137,26 +138,29 @@ class LinearSystem(object):
 
         return indices
 
-    def perform_gaussian_elimination(self):
+    def perform_gaussian_elimination_and_parameterisation(self):
         rref = self.compute_rref()
         
-        # check rref for contradictions or too few pivots
         rref.raise_if_contradictions_exist()
-        rref.raise_if_too_few_pivots()    
         
-        num_variables = rref.dimension
-        solution_coordinates = [rref.planes[i].constant_term for i in range(num_variables)]
-    
-        return Vector(solution_coordinates);
+        
+#        rref.raise_if_too_few_pivots()    
+#        W.I.P
+        direction_vectors = rref.extract_direction_vectors_for_parameterisation()
+        basepoint = rref.extract_basepoint_for_parameterisation()
+        
+        return Parameterisation(basepoint, direction_vectors)
+#        num_variables = rref.dimension
+#        solution_coordinates = [rref.planes[i].constant_term for i in range(num_variables)]
+#    
+#        return Vector(solution_coordinates);
 
     def compute_solution(self):
         try:
-            return self.perform_gaussian_elimination();
+            return self.perform_gaussian_elimination_and_parameterisation();
         except Exception as ex:
             if str(ex) == self.NO_SOLUTIONS_MSG:
                 return self.NO_SOLUTIONS_MSG
-            elif str(ex) == self.INF_SOLUTIONS_MSG:
-                return self.INF_SOLUTIONS_MSG
             else:
                 raise ex
             
@@ -181,6 +185,40 @@ class LinearSystem(object):
         
         if(num_pivots < num_variables):
             raise Exception(self.INF_SOLUTIONS_MSG)
+            
+    def extract_direction_vectors_for_parameterisation(self):
+        num_variables = self.dimension
+        pivot_indices = self.indices_of_first_nonzero_terms_in_each_row()
+        free_variable_indices = set(range(num_variables)) - set(pivot_indices)
+
+        direction_vectors = []
+
+        for free_var in free_variable_indices:
+            vector_coords = [0] * num_variables
+            vector_coords[free_var] = 1
+            for index, plane in enumerate(self.planes):
+                pivot_var = pivot_indices[index]
+                if pivot_var < 0:
+                    break
+                vector_coords[pivot_var] = -plane.normal_vector[free_var]
+
+            direction_vectors.append(Vector(vector_coords))
+
+        return direction_vectors
+
+    def extract_basepoint_for_parameterisation(self):
+        num_variables = self.dimension
+        pivot_indices = self.indices_of_first_nonzero_terms_in_each_row()
+
+        basepoint_coords = [0] * num_variables
+
+        for index, plane in enumerate(self.planes):
+            pivot_var = pivot_indices[index]
+            if pivot_var < 0:
+                break
+            basepoint_coords[pivot_var] = plane.constant_term
+
+        return Vector(basepoint_coords)
 
     def __len__(self):
         return len(self.planes)
