@@ -27,11 +27,3 @@ class Parameterisation(object):
                                              free_var + 1)
             output += '\n'
         return output
-    
-    
-            
-            
-                
-        
-
-
