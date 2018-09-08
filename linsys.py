@@ -137,6 +137,50 @@ class LinearSystem(object):
 
         return indices
 
+    def perform_gaussian_elimination(self):
+        rref = self.compute_rref()
+        
+        # check rref for contradictions or too few pivots
+        rref.raise_if_contradictions_exist()
+        rref.raise_if_too_few_pivots()    
+        
+        num_variables = rref.dimension
+        solution_coordinates = [rref.planes[i].constant_term for i in range(num_variables)]
+    
+        return Vector(solution_coordinates);
+
+    def compute_solution(self):
+        try:
+            return self.perform_gaussian_elimination();
+        except Exception as ex:
+            if str(ex) == self.NO_SOLUTIONS_MSG:
+                return self.NO_SOLUTIONS_MSG
+            elif str(ex) == self.INF_SOLUTIONS_MSG:
+                return self.INF_SOLUTIONS_MSG
+            else:
+                raise ex
+            
+        
+    def raise_if_contradictions_exist(self):
+        for p in self.planes:
+            try:
+                p.first_nonzero_index(p.normal_vector)
+                
+            except Exception as ex:
+                if str(ex) == "No nonzero elements found":
+                    constant_term = MyDecimal(p.constant_term)
+                    if not constant_term.is_near_zero():
+                        raise Exception(self.NO_SOLUTIONS_MSG)
+                else:
+                    raise ex
+                    
+    def raise_if_too_few_pivots(self):
+        pivot_indicies = self.indices_of_first_nonzero_terms_in_each_row()
+        num_pivots = sum([1 if index >= 0 else 0 for index in pivot_indicies])
+        num_variables = self.dimension
+        
+        if(num_pivots < num_variables):
+            raise Exception(self.INF_SOLUTIONS_MSG)
 
     def __len__(self):
         return len(self.planes)
